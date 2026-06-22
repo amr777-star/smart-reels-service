@@ -1,26 +1,24 @@
 import json
 import logging
-import google.generativeai as genai
+
+import httpx
 
 import config
 
 log = logging.getLogger("ai_engine")
 
-_configured = False
+LLM_MODEL = config.LLM_MODEL
 
 
-def _ensure_configured():
-    global _configured
-    if not _configured:
-        genai.configure(api_key=config.GEMINI_API_KEY)
-        _configured = True
-
-
-def _call_gemini(prompt: str) -> str:
-    _ensure_configured()
-    model = genai.GenerativeModel("gemini-2.0-flash")
-    response = model.generate_content(prompt)
-    return response.text
+def _call_llm(prompt: str) -> str:
+    resp = httpx.post(
+        f"{config.LLM_BASE_URL}/chat/completions",
+        headers={"Authorization": f"Bearer {config.LLM_API_KEY}"},
+        json={"model": LLM_MODEL, "messages": [{"role": "user", "content": prompt}]},
+        timeout=60,
+    )
+    resp.raise_for_status()
+    return resp.json()["choices"][0]["message"]["content"]
 
 
 def detect_highlights(transcript_text: str, duration_seconds: float, max_clips: int = 5) -> list[dict]:
@@ -55,7 +53,7 @@ Rules:
 - Order by score descending
 - Ensure clips start/end at natural speech boundaries"""
 
-    raw = _call_gemini(prompt)
+    raw = _call_llm(prompt)
     try:
         cleaned = raw.strip()
         if cleaned.startswith("```"):
@@ -87,7 +85,7 @@ Examples of good hooks:
 - "The truth about productivity"
 - "You're doing it wrong" """
 
-    hook = _call_gemini(prompt).strip().strip('"').strip("'")
+    hook = _call_llm(prompt).strip().strip('"').strip("'")
     log.info(f"Generated hook: {hook}")
     return hook[:60]
 
@@ -112,7 +110,7 @@ Rules:
 - Each B-roll lasts 2-4 seconds
 - Pick moments where the speaker mentions something visual"""
 
-    raw = _call_gemini(prompt)
+    raw = _call_llm(prompt)
     try:
         cleaned = raw.strip()
         if cleaned.startswith("```"):
@@ -128,6 +126,6 @@ def pick_music_mood(clip_transcript: str) -> str:
 
 Transcript: {clip_transcript[:1000]}"""
 
-    mood = _call_gemini(prompt).strip().lower().split()[0]
+    mood = _call_llm(prompt).strip().lower().split()[0]
     valid = {"energetic", "calm", "dramatic", "inspiring", "playful", "dark"}
     return mood if mood in valid else "calm"

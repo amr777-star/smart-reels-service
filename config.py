@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).parent
 WORKSPACE = BASE_DIR / "workspace"
@@ -12,6 +15,9 @@ MUSIC_DIR.mkdir(exist_ok=True)
 FONTS_DIR.mkdir(exist_ok=True)
 DATA_DIR.mkdir(exist_ok=True)
 
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "https://openrouter.ai/api/v1")
+LLM_MODEL = os.getenv("LLM_MODEL", "google/gemini-2.5-flash")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "")
 JAMENDO_CLIENT_ID = os.getenv("JAMENDO_CLIENT_ID", "")

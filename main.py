@@ -19,8 +19,8 @@ log = logging.getLogger("api")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not config.GEMINI_API_KEY:
-        log.warning("GEMINI_API_KEY not set — AI features disabled")
+    if not config.LLM_API_KEY:
+        log.warning("LLM_API_KEY not set — AI features disabled")
     if not config.PEXELS_API_KEY:
         log.warning("PEXELS_API_KEY not set — B-roll disabled")
     yield
@@ -106,7 +106,7 @@ async def health():
         "status": "ok",
         "provider": "self-hosted",
         "features": {
-            "ai_highlights": bool(config.GEMINI_API_KEY),
+            "ai_highlights": bool(config.LLM_API_KEY),
             "broll": bool(config.PEXELS_API_KEY),
             "bgm": bool(list(config.MUSIC_DIR.glob("**/*.mp3")) + list(config.MUSIC_DIR.glob("**/*.wav"))),
         },

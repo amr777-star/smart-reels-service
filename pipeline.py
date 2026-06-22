@@ -84,14 +84,14 @@ async def process_video(
                     sub_path = clip_dir / "with_subs.mp4"
                     current_video = video_processor.burn_subtitles(current_video, ass_path, sub_path)
 
-                if enable_hook and config.GEMINI_API_KEY:
+                if enable_hook and config.LLM_API_KEY:
                     clip_text = " ".join(w.text for w in clip_words)
                     hook = ai_engine.generate_hook(clip_text)
                     if hook:
                         hook_path = clip_dir / "with_hook.mp4"
                         current_video = video_processor.add_hook_overlay(current_video, hook, hook_path)
 
-                if enable_broll and config.PEXELS_API_KEY and config.GEMINI_API_KEY:
+                if enable_broll and config.PEXELS_API_KEY and config.LLM_API_KEY:
                     clip_text = " ".join(w.text for w in clip_words)
                     broll_hints = ai_engine.extract_broll_keywords(clip_text)
                     clip_duration = hl["end"] - hl["start"]
@@ -108,7 +108,7 @@ async def process_video(
 
                 if enable_bgm:
                     clip_text = " ".join(w.text for w in clip_words)
-                    mood = ai_engine.pick_music_mood(clip_text) if config.GEMINI_API_KEY else "calm"
+                    mood = ai_engine.pick_music_mood(clip_text) if config.LLM_API_KEY else "calm"
                     bgm_track = await music_api.fetch_bgm(mood, clip_dir)
                     if bgm_track:
                         bgm_path = clip_dir / "with_bgm.mp4"
