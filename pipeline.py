@@ -11,6 +11,7 @@ import ai_engine
 import video_processor
 import subtitles
 import broll as broll_service
+import music_api
 import db
 
 log = logging.getLogger("pipeline")
@@ -108,7 +109,7 @@ async def process_video(
                 if enable_bgm:
                     clip_text = " ".join(w.text for w in clip_words)
                     mood = ai_engine.pick_music_mood(clip_text) if config.GEMINI_API_KEY else "calm"
-                    bgm_track = video_processor.pick_bgm(mood)
+                    bgm_track = await music_api.fetch_bgm(mood, clip_dir)
                     if bgm_track:
                         bgm_path = clip_dir / "with_bgm.mp4"
                         current_video = video_processor.mix_bgm(current_video, bgm_track, bgm_path)

@@ -1,7 +1,6 @@
 import subprocess
 import logging
 import json
-import random
 from pathlib import Path
 
 import cv2
@@ -187,10 +186,3 @@ def add_watermark(video: Path, watermark_text: str, output: Path) -> Path:
     return output
 
 
-def pick_bgm(mood: str) -> Path | None:
-    mood_dir = config.MUSIC_DIR / mood
-    if not mood_dir.exists():
-        all_tracks = list(config.MUSIC_DIR.glob("**/*.mp3")) + list(config.MUSIC_DIR.glob("**/*.wav"))
-        return random.choice(all_tracks) if all_tracks else None
-    tracks = list(mood_dir.glob("*.mp3")) + list(mood_dir.glob("*.wav"))
-    return random.choice(tracks) if tracks else None

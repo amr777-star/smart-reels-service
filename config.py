@@ -14,6 +14,7 @@ DATA_DIR.mkdir(exist_ok=True)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "")
+JAMENDO_CLIENT_ID = os.getenv("JAMENDO_CLIENT_ID", "")
 API_KEY = os.getenv("API_KEY", "")
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
 

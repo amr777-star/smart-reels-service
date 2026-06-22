@@ -129,15 +129,18 @@ URL → yt-dlp download
 |----------|----------|-------------|
 | `GEMINI_API_KEY` | Yes | Google AI Studio API key ([free](https://aistudio.google.com/apikey)) |
 | `PEXELS_API_KEY` | No | Pexels API key for B-roll ([free](https://www.pexels.com/api/)) |
+| `JAMENDO_CLIENT_ID` | No | Jamendo API for auto BGM ([free](https://devportal.jamendo.com/)) |
 | `API_KEY` | No | Auth key for this service (empty = no auth) |
 | `WHISPER_MODEL` | No | Whisper model size: `tiny`, `base`, `small`, `medium`, `large-v3` |
 | `WHISPER_DEVICE` | No | `cpu` or `cuda` |
 | `CORS_ORIGINS` | No | Comma-separated CORS origins |
 | `PORT` | No | Server port (default: 8100) |
 
-## Music Library
+## Background Music
 
-Place royalty-free tracks in `music/` organized by mood:
+BGM is fetched **automatically** from [Jamendo API](https://devportal.jamendo.com/) (free, 500K+ tracks) based on the clip's mood. No manual downloads needed — just set `JAMENDO_CLIENT_ID` in `.env`.
+
+You can also place your own tracks in `music/` organized by mood as a local fallback:
 
 ```
 music/
@@ -149,7 +152,7 @@ music/
 └── dark/          # suspense, intense
 ```
 
-Recommended sources (free, no attribution): [Pixabay Music](https://pixabay.com/music/), [Mixkit](https://mixkit.co/free-stock-music/).
+Priority: local tracks > Jamendo API. If both are empty, BGM is skipped.
 
 ## Cost per Video
 
