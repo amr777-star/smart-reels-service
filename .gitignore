@@ -1,0 +1,12 @@
+.env
+data/
+workspace/
+__pycache__/
+*.pyc
+.venv/
+music/*.mp3
+music/*.wav
+music/**/*.mp3
+music/**/*.wav
+fonts/*.ttf
+fonts/*.otf

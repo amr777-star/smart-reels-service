@@ -1,0 +1,18 @@
+services:
+  smart-reels:
+    build: .
+    ports:
+      - "${PORT:-8100}:8100"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PEXELS_API_KEY=${PEXELS_API_KEY}
+      - API_KEY=${API_KEY:-}
+      - WHISPER_MODEL=${WHISPER_MODEL:-base}
+      - WHISPER_DEVICE=${WHISPER_DEVICE:-cpu}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    volumes:
+      - ./data:/app/data
+      - ./workspace:/app/workspace
+      - ./music:/app/music
+      - ./fonts:/app/fonts
+    restart: unless-stopped
