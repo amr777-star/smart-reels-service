@@ -7,6 +7,7 @@ import httpx
 from fastapi import FastAPI, HTTPException, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 import config
@@ -29,6 +30,13 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Smart Reels Service", version="2.0.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 app.mount("/clips", StaticFiles(directory=str(config.WORKSPACE)), name="clips")
+
+STATIC_DIR = config.BASE_DIR / "static"
+
+
+@app.get("/")
+async def index():
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 def _check_auth(api_key: str | None):

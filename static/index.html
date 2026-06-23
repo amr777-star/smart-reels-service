@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Reels</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#0a0a0f;--card:#12121a;--border:#1e1e2e;--accent:#7c5cfc;--accent2:#a78bfa;--text:#e4e4e7;--muted:#71717a;--green:#22c55e;--red:#ef4444;--yellow:#eab308}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+  .container{max-width:720px;margin:0 auto;padding:24px 16px}
+  h1{font-size:28px;font-weight:700;text-align:center;margin:32px 0 8px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .subtitle{text-align:center;color:var(--muted);font-size:14px;margin-bottom:32px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px}
+  label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+  input[type="text"],input[type="number"],select{width:100%;padding:12px 14px;background:#0a0a0f;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:15px;outline:none;transition:border .2s}
+  input:focus,select:focus{border-color:var(--accent)}
+  .url-row{display:flex;gap:10px}
+  .url-row input{flex:1}
+  .btn{padding:12px 24px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+  .btn-primary{background:var(--accent);color:#fff;width:100%}
+  .btn-primary:hover{background:var(--accent2)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+  .btn-sm{padding:8px 16px;font-size:13px;border-radius:6px}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+  .settings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .toggle{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#0a0a0f;border-radius:8px;cursor:pointer;user-select:none;border:1px solid var(--border);transition:border .2s}
+  .toggle:has(input:checked){border-color:var(--accent)}
+  .toggle input{display:none}
+  .toggle .dot{width:36px;height:20px;background:#333;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0}
+  .toggle .dot::after{content:'';position:absolute;width:16px;height:16px;background:#666;border-radius:50%;top:2px;left:2px;transition:all .2s}
+  .toggle input:checked+.dot{background:var(--accent)}
+  .toggle input:checked+.dot::after{left:18px;background:#fff}
+  .toggle span{font-size:13px;font-weight:500}
+  .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
+  .status-bar{display:flex;align-items:center;gap:10px;padding:14px;background:#0a0a0f;border-radius:8px;margin-top:16px}
+  .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .status-text{font-size:14px;flex:1}
+  .status-badge{font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+  .badge-queued{background:#eab30820;color:var(--yellow)}
+  .badge-processing,.badge-downloading,.badge-transcribing,.badge-detecting_highlights{background:#7c5cfc20;color:var(--accent2)}
+  .badge-completed{background:#22c55e20;color:var(--green)}
+  .badge-failed{background:#ef444420;color:var(--red)}
+  .clips-grid{display:grid;gap:12px;margin-top:16px}
+  .clip-card{background:#0a0a0f;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .clip-card video{width:100%;max-height:400px;background:#000}
+  .clip-info{padding:12px 14px}
+  .clip-title{font-size:14px;font-weight:600;margin-bottom:4px}
+  .clip-meta{font-size:12px;color:var(--muted)}
+  .clip-actions{display:flex;gap:8px;margin-top:8px}
+  .jobs-list{margin-top:16px}
+  .job-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:#0a0a0f;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border .2s}
+  .job-row:hover{border-color:var(--accent)}
+  .job-url{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .job-time{font-size:12px;color:var(--muted)}
+  .tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--card);border-radius:10px;padding:4px;border:1px solid var(--border)}
+  .tab{flex:1;text-align:center;padding:10px;font-size:14px;font-weight:500;border-radius:8px;cursor:pointer;color:var(--muted);transition:all .2s}
+  .tab.active{background:var(--accent);color:#fff}
+  .hidden{display:none}
+  .error{color:var(--red);font-size:13px;margin-top:8px}
+  @media(max-width:540px){.settings,.row{grid-template-columns:1fr}.container{padding:16px 12px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Smart Reels</h1>
+  <p class="subtitle">AI-powered short clips from any video</p>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('create')">Create</div>
+    <div class="tab" onclick="switchTab('jobs')">History</div>
+  </div>
+
+  <div id="tab-create">
+    <div class="card">
+      <label>Video URL</label>
+      <div class="url-row">
+        <input type="text" id="url" placeholder="YouTube, Rutube, VK or direct .mp4 link">
+      </div>
+
+      <div class="row">
+        <div>
+          <label style="margin-top:12px">Max Clips</label>
+          <input type="number" id="maxClips" value="3" min="1" max="10">
+        </div>
+        <div>
+          <label style="margin-top:12px">Mode</label>
+          <select id="videoMode">
+            <option value="general">General</option>
+            <option value="podcast">Podcast</option>
+            <option value="stream">Stream</option>
+          </select>
+        </div>
+        <div>
+          <label style="margin-top:12px">Watermark</label>
+          <input type="text" id="watermark" placeholder="@channel">
+        </div>
+      </div>
+
+      <div class="settings">
+        <label class="toggle"><input type="checkbox" id="enableHook" checked><span class="dot"></span><span>Hook Overlay</span></label>
+        <label class="toggle"><input type="checkbox" id="enableBroll" checked><span class="dot"></span><span>B-Roll</span></label>
+        <label class="toggle"><input type="checkbox" id="enableBgm" checked><span class="dot"></span><span>Background Music</span></label>
+      </div>
+
+      <div style="margin-top:20px">
+        <button class="btn btn-primary" id="submitBtn" onclick="createJob()">Generate Reels</button>
+      </div>
+      <div id="error" class="error hidden"></div>
+    </div>
+
+    <div id="activeJob" class="card hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <label style="margin:0">Current Job</label>
+        <span id="jobBadge" class="status-badge badge-queued">queued</span>
+      </div>
+      <div class="status-bar">
+        <div class="spinner" id="jobSpinner"></div>
+        <span class="status-text" id="jobStatus">Starting...</span>
+      </div>
+      <div id="jobError" class="error hidden"></div>
+      <div id="clipsContainer" class="clips-grid hidden"></div>
+    </div>
+  </div>
+
+  <div id="tab-jobs" class="hidden">
+    <div class="card">
+      <label>Previous Jobs</label>
+      <div id="jobsList" class="jobs-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let pollTimer = null;
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', t.textContent.trim().toLowerCase() === tab);
+  });
+  document.getElementById('tab-create').classList.toggle('hidden', tab !== 'create');
+  document.getElementById('tab-jobs').classList.toggle('hidden', tab !== 'jobs');
+  if (tab === 'jobs') loadJobs();
+}
+
+function showError(msg) {
+  const el = document.getElementById('error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+async function createJob() {
+  const url = document.getElementById('url').value.trim();
+  if (!url) return showError('Paste a video URL');
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Starting...';
+
+  try {
+    const res = await fetch(`${API}/api/clips`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url,
+        max_clips: parseInt(document.getElementById('maxClips').value) || 3,
+        video_mode: document.getElementById('videoMode').value,
+        enable_hook: document.getElementById('enableHook').checked,
+        enable_broll: document.getElementById('enableBroll').checked,
+        enable_bgm: document.getElementById('enableBgm').checked,
+        watermark: document.getElementById('watermark').value.trim(),
+      })
+    });
+    if (!res.ok) throw new Error((await res.json()).detail || 'Failed');
+    const data = await res.json();
+    startPolling(data.job_id);
+  } catch (e) {
+    showError(e.message);
+    btn.disabled = false;
+    btn.textContent = 'Generate Reels';
+  }
+}
+
+function startPolling(jobId) {
+  const el = document.getElementById('activeJob');
+  el.classList.remove('hidden');
+  document.getElementById('clipsContainer').classList.add('hidden');
+  document.getElementById('jobError').classList.add('hidden');
+  updateStatus('queued', 'Job queued...');
+
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => pollJob(jobId), 3000);
+  pollJob(jobId);
+}
+
+async function pollJob(jobId) {
+  try {
+    const res = await fetch(`${API}/api/clips/${jobId}`);
+    const job = await res.json();
+    const status = job.status;
+    const labels = {
+      queued: 'Waiting in queue...',
+      downloading: 'Downloading video...',
+      transcribing: 'Transcribing audio...',
+      detecting_highlights: 'AI finding best moments...',
+      processing: 'Rendering clips...',
+      completed: 'Done!',
+      failed: 'Failed'
+    };
+    updateStatus(status, labels[status] || status);
+
+    if (status === 'completed') {
+      clearInterval(pollTimer);
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submitBtn').textContent = 'Generate Reels';
+      document.getElementById('jobSpinner').style.display = 'none';
+      renderClips(jobId, job.clips || []);
+    } else if (status === 'failed') {
+      clearInterval(pollTimer);
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submitBtn').textContent = 'Generate Reels';
+      document.getElementById('jobSpinner').style.display = 'none';
+      const errEl = document.getElementById('jobError');
+      errEl.textContent = job.error || 'Processing failed';
+      errEl.classList.remove('hidden');
+    }
+  } catch (e) {
+    // network error, keep polling
+  }
+}
+
+function updateStatus(status, text) {
+  const badge = document.getElementById('jobBadge');
+  badge.textContent = status.replace('_', ' ');
+  badge.className = 'status-badge badge-' + status;
+  document.getElementById('jobStatus').textContent = text;
+  document.getElementById('jobSpinner').style.display =
+    (status === 'completed' || status === 'failed') ? 'none' : 'block';
+}
+
+function renderClips(jobId, clips) {
+  const container = document.getElementById('clipsContainer');
+  container.classList.remove('hidden');
+  if (!clips.length) {
+    container.innerHTML = '<p style="color:var(--muted);font-size:13px">No clips generated</p>';
+    return;
+  }
+  container.innerHTML = clips.map((clip, i) => {
+    const videoUrl = clip.url || `${API}/clips/${jobId}/clips/clip_${String(i).padStart(2,'0')}.mp4`;
+    return `
+      <div class="clip-card">
+        <video controls preload="metadata" src="${videoUrl}"></video>
+        <div class="clip-info">
+          <div class="clip-title">${clip.title || 'Clip ' + (i + 1)}</div>
+          <div class="clip-meta">Score: ${clip.score || '—'}</div>
+          <div class="clip-actions">
+            <a href="${videoUrl}" download class="btn btn-sm btn-outline">Download</a>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function loadJobs() {
+  const list = document.getElementById('jobsList');
+  list.innerHTML = '<p style="color:var(--muted);font-size:13px">Loading...</p>';
+  try {
+    const res = await fetch(`${API}/api/clips?limit=20`);
+    const jobs = await res.json();
+    if (!jobs.length) {
+      list.innerHTML = '<p style="color:var(--muted);font-size:13px">No jobs yet</p>';
+      return;
+    }
+    list.innerHTML = jobs.map(j => `
+      <div class="job-row" onclick="viewJob('${j.job_id}')">
+        <span class="status-badge badge-${j.status}">${j.status.replace('_',' ')}</span>
+        <span class="job-url">${j.url || j.job_id}</span>
+        <span class="job-time">${j.created_at ? new Date(j.created_at).toLocaleString() : ''}</span>
+      </div>`).join('');
+  } catch (e) {
+    list.innerHTML = '<p class="error">Failed to load jobs</p>';
+  }
+}
+
+function viewJob(jobId) {
+  switchTab('create');
+  startPolling(jobId);
+}
+</script>
+</body>
+</html>
