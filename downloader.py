@@ -9,15 +9,19 @@ def download_video(url: str, output_dir: Path) -> Path:
     output_path = output_dir / "source.mp4"
     cmd = [
         "yt-dlp",
-        "--format", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/best",
+        "--format", "bestvideo[height<=1080]+bestaudio/best[height<=1080]/best",
         "--merge-output-format", "mp4",
         "--output", str(output_path),
         "--no-playlist",
-        "--quiet",
+        "--geo-bypass",
+        "--retries", "3",
         url,
     ]
     log.info(f"Downloading: {url}")
-    subprocess.run(cmd, check=True, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        log.error(f"yt-dlp stderr: {result.stderr}")
+        raise RuntimeError(f"yt-dlp failed: {result.stderr[-500:]}")
     if not output_path.exists():
         mp4s = list(output_dir.glob("source.*"))
         if mp4s:
