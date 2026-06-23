@@ -218,7 +218,7 @@ async function pollJob(jobId) {
       document.getElementById('submitBtn').disabled = false;
       document.getElementById('submitBtn').textContent = 'Generate Reels';
       document.getElementById('jobSpinner').style.display = 'none';
-      renderClips(jobId, job.clips || []);
+      renderClips(jobId, job.clips || job.clip_urls || []);
     } else if (status === 'failed') {
       clearInterval(pollTimer);
       document.getElementById('submitBtn').disabled = false;
@@ -250,13 +250,16 @@ function renderClips(jobId, clips) {
     return;
   }
   container.innerHTML = clips.map((clip, i) => {
-    const videoUrl = clip.url || `${API}/clips/${jobId}/clips/clip_${String(i).padStart(2,'0')}.mp4`;
+    const isObj = typeof clip === 'object';
+    const videoUrl = isObj
+      ? (clip.url.startsWith('http') ? clip.url : `${API}${clip.url}`)
+      : `${API}/clips/${jobId}/clips/clip_${String(i).padStart(2,'0')}.mp4`;
+    const title = isObj ? (clip.title || `Clip ${i+1}`) : `Clip ${i+1}`;
     return `
       <div class="clip-card">
         <video controls preload="metadata" src="${videoUrl}"></video>
         <div class="clip-info">
-          <div class="clip-title">${clip.title || 'Clip ' + (i + 1)}</div>
-          <div class="clip-meta">Score: ${clip.score || '—'}</div>
+          <div class="clip-title">${title}</div>
           <div class="clip-actions">
             <a href="${videoUrl}" download class="btn btn-sm btn-outline">Download</a>
           </div>

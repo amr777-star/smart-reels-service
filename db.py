@@ -1,7 +1,7 @@
 import sqlite3
 import json
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import config
 
@@ -54,8 +54,16 @@ def get_job(job_id: str) -> dict | None:
         if not row:
             return None
         d = dict(row)
+        d["job_id"] = d.pop("id")
+        d["url"] = d.get("source_url", "")
         if d["clip_urls"]:
-            d["clip_urls"] = json.loads(d["clip_urls"])
+            raw = json.loads(d["clip_urls"])
+            d["clips"] = [
+                {"url": f"/clips/{job_id}/clips/{Path(p).name}", "title": f"Clip {i+1}", "filename": Path(p).name}
+                for i, p in enumerate(raw)
+            ]
+        else:
+            d["clips"] = []
         return d
 
 
@@ -65,7 +73,15 @@ def list_jobs(limit: int = 50, offset: int = 0) -> list[dict]:
         result = []
         for row in rows:
             d = dict(row)
+            d["job_id"] = d.get("id", "")
+            d["url"] = d.get("source_url", "")
             if d["clip_urls"]:
-                d["clip_urls"] = json.loads(d["clip_urls"])
+                raw = json.loads(d["clip_urls"])
+                d["clips"] = [
+                    {"url": f"/clips/{d['job_id']}/clips/{Path(p).name}", "title": f"Clip {i+1}"}
+                    for i, p in enumerate(raw)
+                ]
+            else:
+                d["clips"] = []
             result.append(d)
         return result
