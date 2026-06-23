@@ -10,11 +10,11 @@ log = logging.getLogger("ai_engine")
 LLM_MODEL = config.LLM_MODEL
 
 
-def _call_llm(prompt: str) -> str:
+def _call_llm(prompt: str, max_tokens: int = 2048) -> str:
     resp = httpx.post(
         f"{config.LLM_BASE_URL}/chat/completions",
         headers={"Authorization": f"Bearer {config.LLM_API_KEY}"},
-        json={"model": LLM_MODEL, "messages": [{"role": "user", "content": prompt}]},
+        json={"model": LLM_MODEL, "max_tokens": max_tokens, "messages": [{"role": "user", "content": prompt}]},
         timeout=60,
     )
     resp.raise_for_status()
